@@ -1,7 +1,7 @@
 import time
 from socket import socket, AF_INET, SOCK_STREAM
 
-from integra import config
+from integramod import config
 
 DELAY = 0.002
 MAX_ATTEMPTS = 3
