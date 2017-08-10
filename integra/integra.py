@@ -99,5 +99,5 @@ def get_name(input_number):
     r = send("EE01" + str(number))
     return r[3:].decode(config.encoding)
 
-interested_input = 23
-print(get_name(interested_input), check_state(interested_input))
+#interested_input = 23
+#print(get_name(interested_input), check_state(interested_input))
