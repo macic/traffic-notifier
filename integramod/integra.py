@@ -1,8 +1,6 @@
 import time
 from socket import socket, AF_INET, SOCK_STREAM
 
-from integramod import config
-
 DELAY = 0.002
 MAX_ATTEMPTS = 3
 
@@ -21,7 +19,7 @@ def checksum(command):
     return crc;
 
 
-def send(command):
+def send(config, command):
     data = bytearray.fromhex(command)
     c = checksum(bytearray.fromhex(command))
     data.append(c >> 8)
@@ -72,22 +70,23 @@ def send(command):
     return output[1:-2]
 
 
-def check_state(input_number):
+def check_state(config, input_number):
     """
     Checks if given state number (decimal value) is violated
+    :param config: Configuration object
     :param input_number: integer
     :return: bool
     """
     if input_number % 8 == 0:
         raise
-    r = send("00")
+    r = send(config, "00")
     b = input_number % 8 - 1
     i = int(input_number / 8)
     response = r[i]
     return bool(2 ** b & response)
 
 
-def get_name(input_number):
+def get_name(config, input_number):
     """
     Gets name of given number (decimal value)
     :param input_number: integer
