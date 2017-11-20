@@ -70,7 +70,7 @@ def cron_job(number):
         # 6. send notification
         tn.send_notification(msg, Config.default_msg_title)
 
-
+@baker.command
 def cron_job_state_true_for_too_long(number, minutes):
     """
     If state of some input is set to True for too long it sends notification

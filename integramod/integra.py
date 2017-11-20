@@ -1,5 +1,6 @@
 import time
 from socket import socket, AF_INET, SOCK_STREAM
+from bitarray import bitarray
 
 DELAY = 0.002
 MAX_ATTEMPTS = 3
@@ -70,6 +71,19 @@ def send(config, command):
     return output[1:-2]
 
 
+def set_bits_positions(data, offset=1):
+    """
+    Returns positions of bits set in a byte array
+    """
+    ba = bitarray(endian='little')
+    ba.frombytes(bytes(data))
+
+    bits = set(
+        idx + offset for idx, bit in enumerate(ba) if bit
+    )
+    return bits
+
+
 def check_state(config, input_number):
     """
     Checks if given state number (decimal value) is violated
@@ -77,13 +91,12 @@ def check_state(config, input_number):
     :param input_number: integer
     :return: bool
     """
-    if input_number % 8 == 0:
-        raise
     r = send(config, "00")
-    b = input_number % 8 - 1
-    i = int(input_number / 8)
-    response = r[i]
-    return bool(2 ** b & response)
+    positions = set_bits_positions(r, 1)
+    if input_number in positions:
+        return True
+    else:
+        return False
 
 
 def get_name(config, input_number):
@@ -98,5 +111,5 @@ def get_name(config, input_number):
     r = send("EE01" + str(number))
     return r[3:].decode(config.encoding)
 
-#interested_input = 23
-#print(get_name(interested_input), check_state(interested_input))
+    # interested_input = 23
+    # print(get_name(interested_input), check_state(interested_input))

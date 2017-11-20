@@ -19,11 +19,12 @@ class TrafficNotifer:
         input = Input.get(Input.number == int(number))
         state = check_state(self.config, int(number))
         if state:
-            ts = datetime.now() - timedelta(minutes=minutes)
+            ts = datetime.now() - timedelta(minutes=int(minutes))
             in_last_period = InputState.select().where((InputState.input == input) & (InputState.datetime >= ts))
-            InputState.create(input=input, state=state)
             if in_last_period:
+                InputState.create(input=input, state=state)
                 return True
+            InputState.create(input=input, state=state)
 
     def check_traffic(self):
         params = {"departure_time": "now",
