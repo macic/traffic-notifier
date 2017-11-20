@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import requests
 from database.models import Input, InputState
 from integramod.integra import check_state
@@ -13,6 +14,16 @@ class TrafficNotifer:
         if state:
             InputState.create(input=input, state=state)
             return True
+
+    def compare_last_state(self, number, minutes):
+        input = Input.get(Input.number == int(number))
+        state = check_state(self.config, int(number))
+        if state:
+            ts = datetime.now() - timedelta(minutes=minutes)
+            in_last_period = InputState.select().where((InputState.input == input) & (InputState.datetime >= ts))
+            InputState.create(input=input, state=state)
+            if in_last_period:
+                return True
 
     def check_traffic(self):
         params = {"departure_time": "now",
@@ -32,19 +43,22 @@ class TrafficNotifer:
             response.append({
                 'route_name': route.get("summary"),
                 'duration': route.get("legs")[0].get("duration_in_traffic",
-                            route.get("legs")[0].get("duration").get("text")).get("text")
+                                                     route.get("legs")[0].get("duration").get("text")).get("text")
             })
         return response
 
-    def send_notification(self, traffic):
+    def prepare_traffic_msg(self, traffic):
         simplified_response = self.parse_response(traffic)
         message = ""
         for route in simplified_response:
             addition = self.config.message_format.format(**route)
             message += addition
+        return message
+
+    def send_notification(self, message, title):
         params = {"token": self.config.pushover_key,
                   "user": self.config.users_to_send_msg_to,
-                  "title": self.config.default_msg_title,
+                  "title": title,
                   "message": message}
         response = requests.post(self.config.pushover_url, params)
         if response.json().get("status") == 1:

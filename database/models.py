@@ -1,8 +1,9 @@
+from config import Config
 import datetime
 from peewee import Model, CharField, IntegerField, ForeignKeyField, DateTimeField, BooleanField
 from playhouse.db_url import connect
 
-DB_LINK = 'mysql://root:magpies666@94.246.168.27:3306/tn'
+DB_LINK = Config.db_link
 db = connect(DB_LINK)
 
 

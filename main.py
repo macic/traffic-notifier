@@ -65,9 +65,25 @@ def cron_job(number):
     # 4. check traffic
     if integra_input_state:
         traffic = tn.check_traffic()
+        # 5. prepare msg based on traffic response from google
+        msg = tn.prepare_traffic_msg(traffic)
+        # 6. send notification
+        tn.send_notification(msg, Config.default_msg_title)
 
-        # 5. send notification
-        tn.send_notification(traffic)
+
+def cron_job_state_true_for_too_long(number, minutes):
+    """
+    If state of some input is set to True for too long it sends notification
+    :param number: input number
+    :param minutes: period between checks in minutes
+    :return:
+    """
+
+    tn = TrafficNotifer(Config)
+    send_notification = tn.compare_last_state(number, minutes)
+
+    if send_notification:
+        tn.send_notification(Config.periodic_msg, Config.periodic_check_msg_title)
 
 
 if __name__ == "__main__":
